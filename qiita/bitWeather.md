@@ -40,7 +40,35 @@ BitBarについては以下のサイトがとてもわかりやすくまとめ�
 無料のFreeプランだと5日後までの3時間毎の天気予報を取得できて、1分間に60回までAPIコールできるそう。(所感としては、全然無料枠でええやろって感じっす)
 あとは、[公式サイト](https://openweathermap.org/api)からAPI keyを発行し、APIにリクエストを投げれば、天気予報が簡単に取得できます。(説明大分省略してます。。。)
 
-詳しく知りたい方は、「[OpenWeatherMap 天気予報 取得](https://www.google.com/search?q=OpenWeatherMap+%E5%A4%A9%E6%B0%97%E4%BA%88%E5%A0%B1+%E5%8F%96%E5%BE%97&rlz=1C5CHFA_enJP829JP829&oq=OpenWeatherMap+%E5%A4%A9%E6%B0%97%E4%BA%88%E5%A0%B1+%E5%8F%96%E5%BE%97&aqs=chrome..69i57j69i61.192j0j7&sourceid=chrome&ie=UTF-8)」で検索!!( ・∇・)
+試しにターミナル上で`curl`コマンドを用いてAPIにリクエストを送ってみました。
+以下のURLにおけるリクエストパラメータの`appid`は公式サイトでのAPI keyなので、皆さんも実際にリクエスト送ってみてください!!
+
+```
+$ curl https://samples.openweathermap.org/data/2.5/find?lat=57&lon=-2.15&cnt=3&appid=b6907d289e10d714a6e88b30761fae22 | jq
+```
+
+レスポンスはjsonやxmlを指定できるそうです。
+以下のレスポンスはjson形式となります。
+
+```json
+{
+    "message":"accurate",
+    "cod":"200",
+    "count":3,
+    "list":[
+        {"id":2641549,
+         "name":"Newtonhill",
+         "coord":{"lat":57.0333,"lon":-2.15},
+         "main":{"temp":275.15,
+                 "pressure":1010,
+                 "humidity":93,
+                 "temp_min":275.15,
+                 "temp_max":275.15},
+                 "dt":1521204600,
+                 以下省略...
+```
+
+取得できれば、あとは`JSON.parse`してあげて、表示したいように表示するだけです( ・∇・)
 
 ### 現在地の取得
 せっかくだし、現在地も取得したいなぁっと思ったので、色々調べてみました。
@@ -54,7 +82,30 @@ BitBarについては以下のサイトがとてもわかりやすくまとめ�
 また、こちらのAPIも使うのが簡単で、[公式ページ](https://ipinfo.io/)から「SIGN UP」を選択し、アカウント登録するとtokenが発行できます。
 そのtokenをリクエストパラメータとして使用しAPIをたたくと現在地情報など取得できます。
 
-こちらも詳しく知りたい方は、「[ipinfo.io 現在地 取得](https://www.google.com/search?q=ipinfo.io+%E7%8F%BE%E5%9C%A8%E5%9C%B0+%E5%8F%96%E5%BE%97&rlz=1C5CHFA_enJP829JP829&oq=ipinfo.io+%E7%8F%BE%E5%9C%A8%E5%9C%B0%E3%80%80%E5%8F%96%E5%BE%97&aqs=chrome..69i57.12122j0j7&sourceid=chrome&ie=UTF-8)」で検索!!( ・∇・)
+こちらも、試しにターミナル上で`curl`コマンドを用いてAPIにリクエストを送ってみました。
+URLの`token`情報は、実際に発行した、トークン情報となります。
+
+```
+$ curl https://ipinfo.io/?token={token} | jq
+```
+
+レスポンスはjson形式のみ？だと思われます。
+結果は、以下のような感じです。
+
+```json
+{
+  "ip": "118.103.63.151",
+  "city": "city name",
+  "region": "region name",
+  "country": "JP",
+  "loc": "lat, lon",
+  "postal": "Postal code",
+  "org": "AS17676 Softbank BB Corp."
+}
+```
+
+取得できたら、こちらもOpenWeatherMap同様、`JSON.parse`してあげ、必要な情報だけ抜き取ったりする感じですね。
+今回のツールでは、取得されたデータからOpenWeatherMapのリクエスト情報に緯度、経度の情報を渡してあげて、現在地の天気予報を取得する処理にしました。
 
 ### 実装におけるプチこだわり
 今回の実装では、なるべくドメイン駆動っぽく実装したかったため、1つのjsファイルに1つの関心事を詰めること意識し実装しました。
